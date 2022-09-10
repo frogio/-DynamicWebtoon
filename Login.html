@@ -1,0 +1,101 @@
+
+<html lang="en">
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Open Webtoon Login</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles_login.css" rel="stylesheet" />
+</head>
+
+<body>	
+
+<?php 
+	include_once "session.php";
+?>
+
+<input type="hidden" id="login_accept" value="<?php echo LOGIN_FLAG_ACCEPT; ?>"/>							<!-- 회원가입 상태 flag 가입 승인 -->
+<input type="hidden" id="login_deny" value="<?php echo LOGIN_FLAG_UNAVAILABLE; ?>"/>						<!-- 회원가입 상태 flag 아이디 중복-->
+
+<section class="page-section" id="contact">
+            <div class="container">
+                <!-- Contact Section Heading-->
+                <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">로그인</h2>
+                <!-- Icon Divider-->
+                <div class="divider-custom">
+                    <div class="divider-custom-line"></div>
+                    <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                    <div class="divider-custom-line"></div>
+                </div>
+                <!-- Contact Section Form-->
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-7">
+                        <!-- * * * * * * * * * * * * * * *-->
+                        <!-- * * SB Forms Contact Form * *-->
+                        <!-- * * * * * * * * * * * * * * *-->
+                        <!-- This form is pre-integrated with SB Forms.-->
+                        <!-- To make this form functional, sign up at-->
+                        <!-- https://startbootstrap.com/solution/contact-forms-->
+                        <!-- to get an API token!-->
+                            <!-- Name input-->
+					<div class="form-floating mb-3">
+						<input class="form-control" id="ID" type="text" placeholder="ID"/>
+						<label for="ID">ID</label>
+					</div>
+					<div class="form-floating mb-3">
+						<input class="form-control" id="Password" type="password" placeholder="Password"/>
+						<label for="PW">Password</label>
+					</div>
+					
+					<button class="btn btn-primary btn-xl" id="submitButton">로그인</button>
+                    </div>
+                </div>
+            </div>
+
+			<script>
+				$(document).ready(function(){			// html 문서가 완전히 로딩되었을 때 실행
+					var submit = document.getElementById("submitButton");
+					submit.addEventListener("click", function() {
+					
+						var id = $('#ID').val();
+						var pw = $('#Password').val();
+						var jObj = new Object();
+						
+						jObj.id = id;
+						jObj.pw = pw;
+						var jsonInfo = JSON.stringify(jObj);	
+						
+						jQuery.ajax({
+							type: "POST",
+							url: "session.php",
+							contentType :'application/json; charset=UTF-8',
+							data: jsonInfo,
+							success:function(result){
+							
+								if(result == $(login_accept).val())
+									//location.href = "/";	// main homepage로 돌아감
+									window.history.back();	// 로그인 이전의 직전페이지로 돌아감.
+								else 
+									alert("로그인 실패, 아이디와 비밀번호를 다시 확인하세요.");
+
+							},error: function(xhr, status, error){
+								alert(error);
+							}
+						});
+						
+					}, false);	
+				});
+			</script>
+        
+</body>
+</html>

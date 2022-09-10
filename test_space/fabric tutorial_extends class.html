@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
+</head>
+
+<body>
+	<p>fabric tutorial place</p>
+	<p>Fabric은 객체(Object)에 기반하여 먼저 사각형이나 원 등 어떤 도형이나, 이미지 선과 같은 객체를 선정하고 거기에 속성값을 부여한다음에 캔버스에 추가하는 형식으로 구현합니다.</p>
+
+	<canvas id="c" width="1000" height="1000" style="border:1px solid"></canvas>
+	
+	<script>
+		var canvas = new fabric.Canvas('c');
+		
+		var LabeledRect = fabric.util.createClass(fabric.Rect, {// 새로운 fabric.Rect 클래스를 상속하여 새로운 클래스를 만듦
+			type:'labeledRect',
+			
+			initialize:function(options){						// 생성자
+				options || (options = {});
+				
+				this.callSuper('initialize', options);			// 부모 클래스 호출
+				this.set("label", options.label || '');
+			},
+			
+			toObject:function(){								// toObject 함수 오버라이딩
+				return fabric.uitl.object.extend(this.callSuper('toObject'),{
+				label: this.get('label')						// toObject 마지막에 label 속성을 추가
+				});
+			},
+			_render:function(ctx){								// _render 함수 오버라이딩, 실제 렌더링을 담당.
+				this.callSuper('_render',ctx);					// 기본 rect 사각형을 그린 뒤.
+		
+				ctx.font = '20px Helvatica';					// label을 그린다.
+				ctx.fillStyle = '#333';
+				ctx.fillText(this.label, -this.width/12, -this.height/2 + 20);
+			}
+			
+		});
+		
+		var labeledRect = new LabeledRect({
+			width:100,
+			height:50,
+			left:100,
+			top:100,
+			label:'test',
+			fill:'#faa'
+		});
+		
+		canvas.add(labeledRect);
+	
+	</script>
+
+</body>
+
+</html>

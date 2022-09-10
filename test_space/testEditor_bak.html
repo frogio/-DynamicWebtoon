@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="./RectMarker.js"></script>
+
+</head>
+
+<body>
+
+
+	<p>fabric test place</p>
+	<p id="current_mode">선택 모드</p>
+	
+	
+	<section class="py-5">	   
+		<div class="container px-4 px-lg-5 my-5">
+			<div class="row gx-4 gx-lg-5" >
+	
+					<div class="col-md-6">
+					
+						<input type="file" id="input-image" name='input-image' accept=".jpg,.jpeg,.png,.gif,.bmp"/>
+						
+						<input type="button" value = "삭제" onclick="clear_canvas()"/>
+						<input type="button" value = "합성" onclick="add_effect()"/>
+						<canvas id="c" style="border:1px solid" width="700" height="700"></canvas>
+					</div>
+
+						
+					<div class="col-md-6">
+						<input type="button" value = "선택" onclick="set_select_mode()">
+			
+						<input type="button" value = "jojo" onclick="select_jojo()">
+						<input type="button" value = "ko" onclick="select_ko()">
+						<input type="button" value = "집중선" onclick="select_focus_line()">
+					</div>
+			</div>
+		</div>
+	</section>
+
+		<script>
+		
+		
+			var img_width = 0;
+			var img_height = 0;
+			// 이미지 파일의 사이즈
+			
+			var canvas_width = $('#c').attr("width");
+			var canvas_height = $('#c').attr("height");
+			
+			var img_left;
+			var img_top;
+			// 이미지의 좌상단 좌표값
+			
+			var rect_left = 0;
+			var rect_top = 0;
+			var rect_right = 0;
+			var rect_bottom = 0;
+			
+			var selected_rect_scaleX = 0;
+			var selected_rect_scaleY = 0;
+			
+			var isClick = false;
+			var isMove = false;
+			
+			var canvas = new fabric.Canvas(c);
+			var markerJSON;							// marker 정보를 JSON으로 저장함.
+			var isGrouped = false;
+			
+			var mode = 'select_mode';				// 기본 모드는 select_mode로 객체를 선택하는 상태임
+			var selected_effect = 'none';
+			var marker_label = 'none';
+			var marker_color = 'none';
+			var cur_img_path = 'none';
+			
+			show_current_mode();
+			init_markerJSON();
+			
+			function esc_key(){						// esc 키 기능, 누르면 모든 객체의 선택이 해제되고 셀렉트 모드로 강제로 변경한다.
+				set_select_mode();
+				canvas.discardActiveObject().renderAll();
+			}
+			
+			function show_current_mode(){
+			
+				if(mode == 'select_mode')
+					$('#current_mode').text("선택 모드");
+				
+				else if(mode == 'insert_mode')
+					$('#current_mode').text(selected_effect + "효과 삽입");
+				
+			}
+		
+			function set_select_mode(){
+				mode = 'select_mode';
+				show_current_mode();
+			}
+	
+		
+			function select_jojo(){
+				mode = 'insert_mode';
+				marker_label = 'jojo';
+				marker_color = 'purple';
+				selected_effect = '죠죠 '
+				show_current_mode();
+			}
+			function select_ko(){
+				mode = 'insert_mode';
+				marker_label = 'ko';
+				marker_color = 'red';
+				selected_effect = 'KO '
+				show_current_mode();
+			}
+			function select_focus_line(){
+				mode = 'insert_mode';
+				marker_label = 'focus_line';
+				marker_color = 'blue'
+				selected_effect = '집중선 ';
+				show_current_mode();
+			}
+		
+			///////////////////////////////////////////////////
+			//
+			// 마킹용 사각형 생성코드
+			//
+			// canvas Width, canvas Height, image Width, image Height, left, top를 json화 하여 python 코드에 넘겨준다.
+			//
+			///////////////////////////////////////////////////
+
+			canvas.on('mouse:down', function(options){						// 마우스 왼쪽 버튼을 클릭할 경우
+				// 이벤트 핸들러는 두가지 속성(e:이벤트 원본, target: 대상)을 
+				// 가진 옵션(options)을 수신하게 됩니다.
+				if(mode =='insert_mode' && isClick == false && options.target && options.target.type == 'image'){
+					rect_left = options.e.layerX;
+					rect_top = options.e.layerY;
+					isClick = true;
+					
+				}
+			});
+
+			canvas.on("mouse:move", function(options){
+				if(mode =='insert_mode' && isClick && options.target && options.target.type == 'image'){
+					rect_right = options.e.layerX;
+					rect_bottom = options.e.layerY;
+					isMove = true;
+					
+				}
+			});
+			
+			
+			canvas.on("mouse:up", function(options){
+			
+				if(mode =='insert_mode' && isMove && isClick && options.target && options.target.type == 'image'){
+					isClick = false;
+					isMove = false;
+					
+					var_right = options.e.layerX;
+					var_bottom = options.e.layerY;
+					
+					var tmp;
+					
+					if(rect_left > rect_right){
+						tmp = rect_left;
+						rect_left = rect_right;
+						rect_right = tmp;
+					}
+					
+					if(rect_top > rect_bottom){
+						tmp = rect_top;
+						rect_top = rect_bottom;
+						rect_bottom = tmp;
+					}
+					
+					if(img_width > img_height){
+						imgPosX = rect_left;
+						imgPosY = rect_top - (canvas_height - img_height ) / 2;
+					}
+					else {
+						imgPosX = rect_left - (canvas_width - img_width ) / 2;
+						imgPosY = rect_top;
+					}
+					
+					//console.log("imgPosX : " + imgPosX  + "imgPosY : " + imgPosY);
+					
+					// 사각형이 뒤집혀질 경우 좌상단과 우하단 좌표를 바꾼다.
+					rect = new RectMarker({
+								left : rect_left,
+								top : rect_top,
+								width : rect_right - rect_left,
+								height: rect_bottom - rect_top,
+								opacity: 0.8,
+								label : marker_label,
+								fill: marker_color
+							});	
+
+					
+					rect_left = 0;
+					rect_right = 0;
+					rect_top = 0;
+					rect_bottom = 0;
+					
+					
+							
+					// 만들어진 마커에 마우스 콜백 함수를 등록한다.
+					rect.on('mousedown',function(options){
+							var obj = options.target;
+							selected_rect_scaleX = obj.scaleX;
+							selected_rect_scaleY = obj.scaleY;
+
+					});
+					
+					canvas.add(rect);
+					
+				}
+				
+			else{		// 만약 이미지의 영역을 넘겨서 사각형을 생성할 경우
+			
+					isClick = false;
+					isMove = false;
+			
+					rect_left = 0;
+					rect_right = 0;
+					rect_top = 0;
+					rect_bottom = 0;
+					return;
+						// 모든것을 기본값으로 초기화하고 종료한다.
+			}
+				
+				
+			}); 
+		
+			
+			
+			document.onkeydown = function(event){							// delete키 기능
+				if(event.keyCode == 46){
+					canvas.getActiveObjects().forEach((obj) => {
+					canvas.remove(obj);
+					});
+					canvas.discardActiveObject().renderAll()
+				}
+				
+				if(event.keyCode == 27)										// esc키 기능
+					esc_key();
+				
+			}
+			
+			///////////////////////////////////////////////////
+			//
+			// Canvas에 이미지 표시
+			//
+			//
+			///////////////////////////////////////////////////
+			
+			
+			document.getElementById('input-image').addEventListener("change", 
+			function (e) {
+				
+				var file = e.target.files[0];
+				var reader = new FileReader();
+				reader.onload = function (f) {
+					var data = f.target.result;
+					
+					var image = new Image();
+					image.src = reader.result;
+					
+					image.onload=function(){	
+						var img_ratio;
+						
+						if(image.width > image.height){
+							img_ratio = image.height / image.width;		// 이미지 원본 비율을 계산						
+							img_width = Math.floor(canvas_width);
+							img_height = Math.floor(canvas_height * img_ratio);
+						}
+						
+						else {
+							img_ratio = image.width / image.height;		// 이미지 원본 비율을 계산
+							img_height = Math.floor(canvas_height);
+							img_width = Math.floor(canvas_width * img_ratio);
+						}
+						
+						
+						alert("just before : " + cur_img_path);
+						markerJSON.base_img_info = new Object();
+						
+						markerJSON.base_img_info.path = cur_img_path;			// 비동기 작업으로 시간차 발생...							
+						markerJSON.base_img_info.width = img_width;
+						markerJSON.base_img_info.height = img_height;
+						// 백그라운드 이미지의 정보를 저장한다.
+						console.log(markerJSON);
+
+						img_left = (canvas_width - img_width) / 2;
+						img_top = (canvas_height - img_height) / 2;
+						// 이미지의 좌상단 좌표
+					}
+					
+					
+														
+					//////////////////// 이미지를 서버에 임시 저장함 //////////////////////////
+					
+					var image_data = $('#input-image').prop('files')[0];
+					var imageData = new FormData();
+					imageData.append("image", image_data);
+					
+					jQuery.ajax({
+						type : "POST",
+						url : "./webtoon_editor_process.php",
+						processData : false,
+						contentType : false,
+						data : imageData,
+						success : function(result){
+							cur_img_path = result;
+							markerJSON.base_img_info.path = result;			// 비동기 작업으로 시간차 발생...
+							alert(markerJSON.base_img_info.path);
+						},
+						error : function(err){
+							console.log("error : " + err);
+	
+						}
+					
+					});	
+
+					 
+					fabric.Image.fromURL(data, function (img) {
+						var oImg = img.set({left: 0, top: 0, angle: 0, selectable:false});
+						
+						oImg.scaleToWidth(img_width);
+						oImg.scaleToHeight(img_height);
+						
+						canvas.centerObject(img);
+						canvas.add(oImg).renderAll();
+					});
+				};
+				reader.readAsDataURL(file);
+			});
+
+			canvas.on('object:moved', function (options) {						// 마킹용 사각형이 이미지 영역을 빠져나가는 것을 방지함.
+				var obj = options.target;
+				var boundingRect = obj.getBoundingRect(true);
+				
+				if(img_width > img_height){										// 이미지 비율이 width가 height보다 클 경우
+					if(boundingRect.top < img_top)
+						obj.top = img_top;
+					
+					if(boundingRect.left < 0)
+						obj.left = 0;
+						
+					if(boundingRect.left + boundingRect.width > canvas_width)
+						obj.left -= boundingRect.left + boundingRect.width - canvas_width;
+						
+					if(boundingRect.top + boundingRect.height > img_height + img_top)
+						obj.top -= boundingRect.top + boundingRect.height - (img_height + img_top);
+
+				}
+				
+				else{															// 이미지 비율이 height이 width보다 클 경우
+				
+					if(boundingRect.top < 0)
+						obj.top = 0;
+					
+					if(boundingRect.left < img_left)
+						obj.left = img_left;
+						
+					if(boundingRect.left + boundingRect.width > img_left + img_width)
+						obj.left -= boundingRect.left + boundingRect.width - (img_left + img_width);
+						
+					if(boundingRect.top + boundingRect.height > canvas_height)
+						obj.top -= boundingRect.top + boundingRect.height - canvas_height;
+				
+				}
+				
+			});
+
+			canvas.on('object:scaled', function (options) {					// 마킹용 사각형의 사이즈를 조절할 때 이미지 영역을 빠져나가는것을 방지함.
+				var obj = options.target;
+				var boundingRect = obj.getBoundingRect(true);
+				if (img_width > img_height && boundingRect.left < 0
+					|| boundingRect.top < img_top
+					|| boundingRect.left + boundingRect.width > canvas_width
+					|| boundingRect.top + boundingRect.height > img_height + img_top) {
+					
+					obj.left = img_left;
+					obj.top = img_top;
+					obj.scaleX = selected_rect_scaleX;
+					obj.scaleY = selected_rect_scaleY;
+				}
+				
+				else if(img_width <= img_height && boundingRect.left < 0
+					|| boundingRect.top < img_top
+					|| boundingRect.left + boundingRect.width > img_left + img_width
+					|| boundingRect.top + boundingRect.height > canvas_height){
+				
+					obj.left = img_left;
+					obj.top = img_top;
+					obj.scaleX = selected_rect_scaleX;
+					obj.scaleY = selected_rect_scaleY;
+				
+				
+				}
+				
+			});
+
+			canvas.on('selection:created', function (e) {			// 마킹용 사각형의 회전을 막아놓음
+				const activeSelection = e.target;
+				activeSelection.set({lockRotation : true});
+			});
+			
+			// fired e.g. when you select one object first,
+			// then add another via shift+click
+			canvas.on('selection:updated', function (e) {			// 마킹용 사각형의 회전을 막아놓음
+				const activeSelection = e.target;
+				if (activeSelection.hasRotatingPoint) {
+					activeSelection.set({lockRotation : true});
+				}
+			});
+				
+			function init_markerJSON(){
+				markerJSON = [];
+				markerJSON = new Object();
+			
+				markerJSON.canvas_info = new Object();
+				markerJSON.canvas_info.width = canvas_width;
+				markerJSON.canvas_info.height = canvas_height;
+	
+				markerJSON.base_img_info = new Object();
+				markerJSON.base_img_info.width = img_width;
+				markerJSON.base_img_info.height = img_height;
+
+				markerJSON.Markers = new Array();
+
+			}
+				
+			function clear_canvas(){
+				canvas.clear();
+				init_markerJSON();
+			}
+			
+			function add_effect(){
+				canvas.discardActiveObject();						// 모든 선택을 해제한다. (오브젝트들이 여러개 선택되어 있으면 좌표가 바뀌기 때문)
+				
+				// canvas 오브젝트에서 marker를 추출한다.					
+				for(var i = 1; i < canvas._objects.length; i++){	// 첫번째 요소부터가 마커이므로 i는 1부터 시작한다.
+				
+					if (canvas._objects[i].label){					// label 속성을 가지고 있는 오브젝트는 marker로 취급한다.
+						var markerObj = new Object();
+						
+						markerObj.left = canvas._objects[i].left;
+						markerObj.top = canvas._objects[i].top;
+						markerObj.width = canvas._objects[i].width;
+						markerObj.height = canvas._objects[i].height;
+						markerObj.label = canvas._objects[i].label;
+					
+						if(canvas._objects[i].scaleX)					// 마커의 가로길이가 변경되어 스케일값X을 가질 경우
+							markerObj.width = canvas._objects[i].width * canvas._objects[i].scaleX;
+
+						if(canvas._objects[i].scaleY)					// 마커의 세로길이가 변경되어 스케일값Y을 가질 경우
+							markerObj.height = canvas._objects[i].height * canvas._objects[i].scaleY;
+						
+						markerJSON.Markers.push(markerObj);
+						
+						// python 모듈에 전달하기 위해 marker들을 JSON에 넣는다.
+
+						//console.log(markerJSON);
+					}			
+				}		// marker 오브젝트를 추출해 JSON으로 만든다.
+				
+				console.log(markerJSON);
+				console.log(canvas);
+				
+				var json = JSON.stringify(markerJSON);
+				
+				alert("영상 합성을 시작합니다");
+
+				jQuery.ajax({
+						type: "POST",
+						url: "chromakey_final.py",
+						contentType :'charset=UTF-8',
+						data: json,
+						success:function(result){
+							
+							alert("영상 합성 완료");
+							// for debug
+							//show_marker_json(result);
+							
+						},error: function(xhr, status, error){
+							alert(error);
+						}
+				});
+
+				canvas.renderAll();	
+				init_markerJSON();			// 영상 합성이 완료된 후 markerJSON을 초기화한다.
+			}
+
+
+
+
+	function show_marker_json(result){
+			var resultString = "canvas width : " + result.canvas_info.width + "\n" +
+							"canvas height : " + result.canvas_info.height + "\n" +
+							"base img width : " + result.base_img_info.width + "\n" +
+							"base img height : " + result.base_img_info.height + "\n";
+			for(var i = 0; i < result.Markers.length; i++){
+				resultString +=  i + " markers : left " + result.Markers[i].left +
+								" top " + result.Markers[i].top + 
+								" width " + result.Markers[i].width +
+								" height "+ result.Markers[i].height +
+								" label " + result.Markers[i].label + '\n';
+			
+			}			
+			alert(resultString);
+	}
+
+	</script>
+
+	
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>opencv.js sandbox</title>
+    <meta charset="UTF-8" />
+  	<script src="https://docs.opencv.org/3.4.0/opencv.js"></script>
+  </head>
+
+  <body>
+    <div>
+		<!-- Video Tag에 muted 속성을 추가하여 자동 재생이 되도록 한다. -->
+		<video style="visibility:collapse" id="videoInput" src="jojo.mp4" width="700" height="700" muted="muted"></video>
+		<img style="visibility:collapse" id='baseImage' src='No Straight Road mayday and sayu.png' width= "700" height="700"> </img>
+		<canvas id="canvasOutput"></canvas>
+		<canvas id="canvasOutput2"></canvas>
+    </div>
+	<script>
+	const video = document.getElementById('videoInput');
+	video.play();
+	const baseImg = document.getElementById('baseImage');
+	let base_img = cv.imread(baseImg);
+			
+	const width = video.width;
+	const height = video.height;
+	
+	const FPS = 30;
+	let streaming = true;
+	let src= new cv.Mat(height, width, cv.CV_8UC4);
+	let cap= new cv.VideoCapture(video);
+	
+	setTimeout(processVideo, 0);
+	
+	function processVideo () {
+			if (!streaming) {
+				src.delete( );
+				return;
+			}
+	
+			const begin = Date.now();
+			cap.read(src)
+			let mask = new cv.Mat();
+			//let dst_hsv = new cv.Mat(height, width, cv.CV_8UC4);
+			//cv.cvtColor(src, dst_hsv, cv.COLOR_BGR2HSV, 0);
+			
+			
+			//cv.cvtColor(src, dst_hsv, cv.COLOR_BGR2HSV, 0);
+			
+			let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 255]);
+			let high = new cv.Mat(src.rows, src.cols, src.type(), [0, 255, 0, 255]);
+			
+			cv.inRange(src, low, high, mask);
+			base_img.copyTo(src, mask);
+			// base_img를 src에 복사하는데 mask를 씌워서 mask의 하얀부분(255)만 복사한다.
+			
+			
+			cv.imshow('canvasOutput', src);
+			cv.imshow("canvasOutput2", base_img);
+			
+			const delay = 1000/FPS - (Date.now() - begin);
+			setTimeout(processVideo, delay);
+	}
+
+	</script>
+
+  </body>
+</html>

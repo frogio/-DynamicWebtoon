@@ -1,0 +1,153 @@
+<html lang="en">
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Open Webtoon Login</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles_login.css" rel="stylesheet" />
+</head>
+<body>	
+
+<!-- php 상수를 읽어온다. -->
+<?php 
+	include "session.php";
+?>
+
+<input type="hidden" id="register_accept" value="<?php echo REGISTER_FLAG_ACCEPT; ?>"/>							<!-- 회원가입 상태 flag 가입 승인 -->
+<input type="hidden" id="id_overlapped" value="<?php echo REGISTER_FLAG_ID_OVERLAPPED; ?>"/>					<!-- 회원가입 상태 flag 아이디 중복-->
+<input type="hidden" id="nickname_overlapped" value="<?php echo REGISTER_FLAG_NICKNAME_OVERLAPPED; ?>"/>		<!-- 회원가입 상태 flag 별명 중복-->
+
+
+<section class="page-section" id="contact">
+            <div class="container">
+                <!-- Contact Section Heading-->
+                <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">회원 가입</h2>
+                <!-- Icon Divider-->
+                <div class="divider-custom">
+                    <div class="divider-custom-line"></div>
+                    <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
+                    <div class="divider-custom-line"></div>
+                </div>
+				
+				
+				
+				<!-- Register Form-->
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xl-7">
+                            <div class="form-floating mb-3">
+                                <input id = "ID" class="form-control" type="text" placeholder="ID"/>
+                                <label for="ID">ID</label>
+                            </div>
+							<div class="form-floating mb-3">
+                                <input id = "nickName" class="form-control" type="text" placeholder="NickName"/>
+                                <label for="NickName">NickName</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id = "password" class="form-control" type="password" placeholder="Password"/>
+                                <label for="PW">Password</label>
+                            </div>
+							<div class="form-floating mb-3">
+                                <input id = "checkPassword" class="form-control" type="password" placeholder="CheckPassword"/>
+                                <label for="CPK">CheckPassword</label>
+                            </div>
+							<div class="form-floating mb-3">
+                                <input id = "email" class="form-control" type="text" placeholder="name@example.com"/>
+                                <label for="email">Email</label>
+                            </div>
+							
+                            <button class="btn btn-primary btn-xl" id="submitButton">회원가입</button>
+                    </div>	
+                </div>
+            </div>
+
+	<script>	
+				$(document).ready(function(){			// html 문서가 완전히 로딩되었을 때 실행
+					var submit = document.getElementById("submitButton");
+					submit.addEventListener("click", function() {
+					
+						var user_id = $('#ID').val();
+						var user_pw = $('#password').val();
+						var chk_user_pw = $('#checkPassword').val();
+						var nickName = $('#nickName').val();
+						var email = $('#email').val();
+						var jObj = new Object();
+						
+						if(user_id == ""){
+							alert("아이디를 입력해 주세요");
+							$('#ID').focus();
+							return;
+						}
+						else if(nickName == ""){
+							alert("별명을 입력해 주세요");
+							$('#nickName').focus();
+							return;
+						}
+						else if(email == ""){
+							alert("이메일을 입력해 주세요");
+							$('#email').focus();
+							return;
+						}
+						else if(user_pw == ""){
+							alert("비밀번호를 입력해주세요");
+							$('#password').focus();
+							return;
+						}
+						if(chk_user_pw != user_pw){
+							alert("비밀번호를 다시 확인해주세요");
+							$('#checkPassword').focus();
+							return;
+						}
+						
+						jObj.id = user_id;
+						jObj.pw = user_pw;
+						jObj.e_mail = email;
+						jObj.nick_name = nickName;
+						var jsonInfo = JSON.stringify(jObj);
+						
+						jQuery.ajax({
+							type: "POST",
+							url: "register.php",
+							contentType :'application/json; charset=UTF-8',
+							data: jsonInfo,
+							success:function(result){
+							
+								if(result == $('#id_overlapped').val()){			// id 중복
+									alert("아이디가 중복되었습니다.");
+									$('#ID').focus();
+									$('#ID').select();
+								}
+								
+								else if(result == $('#nickname_overlapped').val()){			// nickname 중복
+									alert("별명이 중복되었습니다.");								
+									$('#nickName').focus();
+									$('#nickName').select();
+								}
+
+								else if(result == $('#register_accept').val()){		// 등록 승인
+									alert("회원가입 완료");
+									location.href = "/";	// main homepage로 돌아감
+								}
+								
+							},error: function(xhr, status, error){
+								alert(error);
+							}
+						
+						});
+							
+					}, false);
+				});				
+		</script>
+				
+    
+</body>
+</html>	

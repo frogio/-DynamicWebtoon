@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
+</head>
+
+<body>
+
+<input type="button" onclick="get_info()" value="getMakerinfo"/>
+
+<canvas id='c' style="border:1px solid" width="700" height="700"></canvas>
+
+<script>
+
+	var canvas = new fabric.Canvas('c');
+	var isClick = false;
+	
+	var mode = "insert_mode";
+	
+	var rect_left = 0;
+	var rect_top = 0;
+	var rect_right = 0;
+	var rect_bottom = 0;
+	
+	var selected_rect_scaleX = 0;
+	var selected_rect_scaleY = 0;
+	
+	var isClick = false;
+	var isMove = false;
+	var image;
+	
+	var make_once = false;
+
+	canvas.on('mouse:down', function(options){						// 마우스 왼쪽 버튼을 클릭할 경우
+		// 이벤트 핸들러는 두가지 속성(e:이벤트 원본, target: 대상)을 
+		// 가진 옵션(options)을 수신하게 됩니다.
+		if(mode =='insert_mode' && isClick == false){
+			rect_left = options.e.layerX;
+			rect_top = options.e.layerY;
+			isClick = true;
+			
+		}
+	});
+
+	canvas.on("mouse:move", function(options){
+		if(mode =='insert_mode' && isClick){
+			rect_right = options.e.layerX;
+			rect_bottom = options.e.layerY;
+			isMove = true;
+			
+		}
+	});
+	
+	
+	canvas.on("mouse:up", function(options){
+		if(make_once == false){
+			make_once = true;
+		if(mode =='insert_mode' && isMove){
+			isClick = false;
+			isMove = false;
+			
+			var_right = options.e.layerX;
+			var_bottom = options.e.layerY;
+			
+			var tmp;
+			
+			if(rect_left > rect_right){
+				tmp = rect_left;
+				rect_left = rect_right;
+				rect_right = tmp;
+			}
+			
+			if(rect_top > rect_bottom){
+				tmp = rect_top;
+				rect_top = rect_bottom;
+				rect_bottom = tmp;
+			}
+			
+			//console.log("imgPosX : " + imgPosX  + "imgPosY : " + imgPosY);
+			
+			// 사각형이 뒤집혀질 경우 좌상단과 우하단 좌표를 바꾼다.
+
+			
+			const aCoords = {
+				tl: new fabric.Point(rect_left, rect_top),
+				tr: new fabric.Point(rect_right, rect_top),
+				br: new fabric.Point(rect_right, rect_bottom),
+				bl: new fabric.Point(rect_left, rect_bottom)
+			}
+			
+			fabric.Image.fromURL('../dynamic_webtoon_editor/marker_img/jojo_marker_img.png', img => {
+				const width = img.width;
+				const height = img.height;
+
+				img.set({
+					left: aCoords.tl.lerp(aCoords.br).x,
+					top: aCoords.tl.lerp(aCoords.br).y,
+					scaleX:(aCoords.tl.distanceFrom(aCoords.tr)) / width,
+					scaleY:(aCoords.tl.distanceFrom(aCoords.bl)) / height,
+					originY: 'center',
+					originX: 'center',
+					label:'jojo'
+				})
+				
+				canvas.add(img);
+			});
+			console.log(canvas);
+
+			rect_left = 0;
+			rect_right = 0;
+			rect_top = 0;
+			rect_bottom = 0;
+			
+		}
+		
+	else{		// 만약 이미지의 영역을 넘겨서 사각형을 생성할 경우
+	
+			isClick = false;
+			isMove = false;
+	
+			rect_left = 0;
+			rect_right = 0;
+			rect_top = 0;
+			rect_bottom = 0;
+			return;
+				// 모든것을 기본값으로 초기화하고 종료한다.
+		}
+		}
+		
+	});
+
+
+	function get_info(){
+		console.log("left : " + canvas._objects[0].aCoords.tl.x);
+		console.log("top : " + canvas._objects[0].aCoords.tl.y);
+		console.log("image Width " + canvas._objects[0].width * canvas._objects[0].scaleX);
+		console.log("image Height " + canvas._objects[0].height * canvas._objects[0].scaleY);
+	}
+	
+	//console.log(canvas);
+	
+	
+	
+
+</script>
+
+</body>
+
+</html>

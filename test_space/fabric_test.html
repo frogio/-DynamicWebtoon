@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://unpkg.com/fabric@4.6.0/dist/fabric.min.js"></script>
+</head>
+
+<body>
+
+
+	<p>fabric test place</p>
+	<input type="file" name="illust" id="input-image" accept=".jpg,.jpeg,.png,.gif,.bmp" onchange="imgUpload()"/>
+	</br>
+	<canvas id="c" style="border:1px solid" width="700" height="700"></canvas>
+		<script>
+		var canvas_width = $('#c').attr("width");
+		var canvas_height = $('#c').attr("height");
+		
+		alert("width : " + canvas_width + "height : " + canvas_height);
+		
+		var img_width;
+		var img_height;
+		
+		function imgUpload(){									// 이미지의 사이즈를 가져오는 함수
+			
+			var file = document.getElementById('input-image');
+            var reader = new FileReader(); 
+            reader.readAsDataURL(file.files[0]);
+            reader.onload = function(){ 
+            
+			var image = new Image();
+            image.src = reader.result;
+			
+				image.onload=function(){
+					img_width = image.width;
+					img_height = image.height;
+					alert("width : " + img_width + " height : " + img_height);	
+					
+					$('#c').attr("width", img_width);
+					$('#c').attr("height", img_height);
+
+				}
+			}
+		}
+
+	</script>
+
+	
+</body>
+
+</html>
