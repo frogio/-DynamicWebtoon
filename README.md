@@ -1,5 +1,5 @@
 # DynamicWebtoon
-애니메이션을 첨가할 수 있는 에디터를 제공하는 특수 웹툰 사이트
+웹툰에 애니메이션을 첨가할 수 있는 에디터를 제공하는 특수 웹툰 사이트
 
 ### 개요
 
@@ -20,20 +20,25 @@ php, apache, MySQL, jQuery, fabric.js, OpenCV
 </br>
 
 ### 데모 영상
-웹 기반 편집기를 통해 애니메이션 효과를 적용한 웹툰 영상
+-웹 기반 편집기를 통해 애니메이션 효과를 적용한 웹툰 영상
 
 </br>
 </br>
 
-
-<img src="https://user-images.githubusercontent.com/12217092/189482411-cc51d18e-047e-447f-aa8a-010fce9b462c.gif" width="40%" height="40%"></img>
+<img src="https://user-images.githubusercontent.com/12217092/189482411-cc51d18e-047e-447f-aa8a-010fce9b462c.gif" width="20%" height="20%"></img>
 
 </br>
 </br>
 
+-편집기 시연 영상
+
+<img src="https://user-images.githubusercontent.com/12217092/189485654-57375b05-51b5-4198-bfd5-aaff9cd38460.gif" width="50%" height="50%"></img>
+
+</br>
+</br>
 
 ### 파일 구성
-Login.html, register.php, Register.html, session.php
+Login.html, register.php, Register.html, session.php</br>
 로그인 및 가입, 세션관련 php 프로그램</br>
 
 uploadIllust.php, viewIllust.php, 
