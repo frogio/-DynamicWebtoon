@@ -26,7 +26,7 @@ php, apache, MySQL, jQuery, fabric.js, OpenCV
 </br>
 
 
-<img src="https://user-images.githubusercontent.com/12217092/189482411-cc51d18e-047e-447f-aa8a-010fce9b462c.gif" width="40%", height="40%"></img>
+<img src="https://user-images.githubusercontent.com/12217092/189482411-cc51d18e-047e-447f-aa8a-010fce9b462c.gif" width="40%" height="40%"></img>
 
 </br>
 </br>
