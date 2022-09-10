@@ -39,7 +39,19 @@ php, apache, MySQL, jQuery, fabric.js, OpenCV
 
 ### 파일 구성
 Login.html, register.php, Register.html, session.php</br>
-</br>
 로그인 및 가입, 세션관련 php 프로그램</br>
 
-uploadIllust.php, viewIllust.php, 
+uploadIllust.php, viewIllust.php, modify_illust.php, illust_list.php, illust_board, registerIllust</br>
+일러스트 게시판 / 수정 / 삭제와 관련된 php 프로그램</br>
+
+dynamic_webtoon_list.php, webtoon_board.php, dynamic_webtoon_player.php</br>
+웹툰을 게시 / 재생과 관련된 php 프로그램</br>
+
+dynamic_webtoon_post</br>
+편집기를 이용해 만든 웹툰 파일들을 저장해놓은 폴더</br>
+
+dynamic_webtoon_editor</br>
+핵심이 되는 Webtoon Editor 프로그램이 존재하는곳</br>
+	- webtoon_editor.php : 웹툰 편집기 프로그램</br>
+	- chromakey_process.py : 애니메이션 웹툰을 만들기 위해 apache와 cgi로 연동이 되어 실행되는 처리 프로그램, webtoon_editor.php에서 처리를 위해 JSON을 넘김.</br>
+	- chromakey_algorithm.py : 애니메이션 첨가를 위해 chromakey_process가 호출하는 핵심 알고리즘 프로그램. mask 알고리즘과 Vlahos 알고리즘이 작성되어 있음.
