@@ -172,7 +172,7 @@ $GLOBALS['total_block_cnt'] = 0;					// 전체 블럭 개수
 			
 				if($GLOBALS['cur_page'] > 1){
 					echo '<a class="btn btn-outline-dark mt-auto" href="dynamic_webtoon_list.php?cur_page=1">처음 </a>';
-					$pre = $GLOBALS['$cur_page'] - 1;
+					$pre = $GLOBALS['cur_page'] - 1;
 					echo '<a class="btn btn-outline-dark mt-auto" href = "dynamic_webtoon_list.php?cur_page='.$pre.'">이전 <a>';
 				}
 				
