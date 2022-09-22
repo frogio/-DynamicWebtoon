@@ -18,7 +18,7 @@ php, apache, MySQL, jQuery, fabric.js, OpenCV
 
 </br>
 </br>
-
+<span>
 ### 데모 영상
 -웹 기반 편집기를 통해 애니메이션 효과를 적용한 웹툰 영상
 
@@ -33,7 +33,7 @@ php, apache, MySQL, jQuery, fabric.js, OpenCV
 -편집기 시연 영상
 
 <img src="https://user-images.githubusercontent.com/12217092/189485654-57375b05-51b5-4198-bfd5-aaff9cd38460.gif"></img>
-
+</span>
 </br>
 </br>
 
